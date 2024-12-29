@@ -9,6 +9,7 @@ contract DeployKamisama is BaseScript {
     function run() external override {
         KamisamaConfig memory config =
             abi.decode(vm.parseJson(_getConfig(CONFIG_FILE), string.concat(".", _getNetwork())), (KamisamaConfig));
+
         _loadContracts(false);
         _loadOtherContractNetwork(true, ARBITRUM);
 
