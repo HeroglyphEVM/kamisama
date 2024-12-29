@@ -18,7 +18,7 @@ import { OAppCore, Origin } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/O
  */
 contract Kamisama is IKamisama, ERC721, OAppReceiver {
     uint256 public immutable COST;
-    uint256 public immutable MAX_SUPPLY;
+    uint256 public constant MAX_SUPPLY = 7000;
 
     string public collectionURI;
 
@@ -34,7 +34,6 @@ contract Kamisama is IKamisama, ERC721, OAppReceiver {
     {
         require(_treasury != address(0), InvalidTreasury());
         COST = _cost;
-        MAX_SUPPLY = 7000;
         unlockedIds = 1000;
 
         treasury = _treasury;
