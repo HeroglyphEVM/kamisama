@@ -1,8 +1,8 @@
 {
     "sepolia":
     {
-        "01_owner": "0x835E072530503DddA07B2F35e05DD3e647a0D9F2",
-        "02_treasury": "0x835E072530503DddA07B2F35e05DD3e647a0D9F2",
+        "01_owner": "0x3D0801D53c84109906319dFC9222eF8E199bdA69",
+        "02_treasury": "0x3D0801D53c84109906319dFC9222eF8E199bdA69",
         "03_cost": 250000000000000,
         "04_lzEndpoint": "0x6EDCE65403992e310A62460808c4b910D972f10f",
         "05_lzEndpointIDLinked": 0,

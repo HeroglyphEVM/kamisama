@@ -18,13 +18,18 @@ import { OAppCore, Origin } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/O
  */
 contract Kamisama is IKamisama, ERC721, OAppReceiver {
     uint256 public immutable COST;
-    uint256 public constant MAX_SUPPLY = 7000;
-
-    string public collectionURI;
+    uint32 public constant MAX_SUPPLY_PER_NATION = 1000;
+    uint32 public constant TOTAL_NATIONS = 7;
+    uint32 public constant RESERVED_IDS_PER_NATION = 15;
 
     address public treasury;
-    uint32 public lastMintedID;
-    uint32 public unlockedIds;
+    uint32 public lastedUnlockedNation;
+    uint32 public freeMintPassLeft;
+
+    mapping(uint32 nation => uint32 lastMintedId) public lastMintedIdByNation;
+    mapping(uint32 nation => string) public nationCollectionURIs;
+    mapping(uint32 nation => uint32) public reservedNFTLeft;
+    mapping(address validator => uint32) public freeMintPassBalance;
 
     bool public isImmutable;
 
@@ -34,9 +39,10 @@ contract Kamisama is IKamisama, ERC721, OAppReceiver {
     {
         require(_treasury != address(0), InvalidTreasury());
         COST = _cost;
-        unlockedIds = 1000;
 
         treasury = _treasury;
+        freeMintPassLeft = RESERVED_IDS_PER_NATION * TOTAL_NATIONS;
+        reservedNFTLeft[0] = RESERVED_IDS_PER_NATION;
     }
 
     function _lzReceive(
@@ -47,44 +53,103 @@ contract Kamisama is IKamisama, ERC721, OAppReceiver {
         bytes calldata /*_extraData*/ // @dev unused in the default implementation.
     ) internal virtual override {
         (uint32 _blockNumber, address _of) = abi.decode(_message, (uint32, address));
-        uint256 nftId = _executeMint(_of);
+        uint32 freeMintPassCached = freeMintPassLeft;
+        if (freeMintPassCached == 0) revert NoMoreFreeMintPass();
 
-        emit KamisamaValidatorMinted(nftId, _of, _guid, _blockNumber);
+        freeMintPassCached--;
+        freeMintPassBalance[_of]++;
+
+        freeMintPassLeft = freeMintPassCached;
+
+        emit FreeMintPassGiven(_guid, _blockNumber, _of, freeMintPassCached);
     }
 
-    function mint() external payable override {
-        require(msg.value == COST, NotEnoughNative());
-        _executeMint(msg.sender);
-    }
+    function mint(uint32[] calldata _nations, uint32[] calldata _quantities, bool _useFreeMintPass)
+        external
+        payable
+        override
+    {
+        uint256 totalNations = _nations.length;
+        if (_useFreeMintPass && msg.value > 0) {
+            revert NativeDetectedWhenFreeMintPassIsUsed();
+        }
 
-    function _executeMint(address _to) internal returns (uint256 nftId_) {
-        require(lastMintedID < unlockedIds, MaxSupplyReached());
-        nftId_ = ++lastMintedID;
+        require(totalNations == _quantities.length, MismathArrayLength());
 
-        _safeMint(_to, nftId_);
-        emit KamisamaMinted(_to, nftId_, msg.value);
+        uint256 totalCost = 0;
+        for (uint256 i = 0; i < totalNations; ++i) {
+            totalCost += COST * _quantities[i];
+            _executeMint(_nations[i], msg.sender, _quantities[i], _useFreeMintPass);
+        }
 
-        if (msg.value == 0) return nftId_;
+        if (_useFreeMintPass) return;
 
-        (bool successNativeCall,) = treasury.call{ value: COST }("");
+        require(msg.value == totalCost, NotEnoughNative());
+
+        (bool successNativeCall,) = treasury.call{ value: totalCost }("");
         require(successNativeCall, FailedToSendNative());
-
-        return nftId_;
     }
 
-    function injectMore(uint32 _amount) external onlyOwner {
-        uint32 cachedUnlockedIds = unlockedIds + _amount;
-        require(cachedUnlockedIds <= MAX_SUPPLY, MaxSupplyReached());
+    function _executeMint(uint32 _nation, address _to, uint32 _quantity, bool _useFreeMintPass) internal {
+        require(_nation <= lastedUnlockedNation, NationNotFound());
+        require(_quantity > 0, InvalidQuantity());
+        uint32 lastIdeMintedCached = lastMintedIdByNation[_nation];
 
-        unlockedIds = cachedUnlockedIds;
-        emit MoreUnlocked(_amount);
+        require(lastIdeMintedCached + _quantity <= MAX_SUPPLY_PER_NATION, MaxSupplyReached());
+        lastMintedIdByNation[_nation] = lastIdeMintedCached + _quantity;
+
+        if (_useFreeMintPass) {
+            _spendFreePass(_nation, _quantity);
+        }
+
+        uint256 nftId = 0;
+        uint32 reservedLeft = reservedNFTLeft[_nation];
+
+        for (uint32 i = 0; i < _quantity; ++i) {
+            nftId = ++lastIdeMintedCached + (MAX_SUPPLY_PER_NATION * _nation);
+
+            if (lastIdeMintedCached > (MAX_SUPPLY_PER_NATION - reservedLeft)) {
+                require(_useFreeMintPass, ValidatorReservedID());
+            }
+
+            _safeMint(_to, nftId);
+            emit KamisamaMinted(_to, _nation, nftId);
+        }
     }
 
-    function reveals(string calldata _ipfs) external onlyOwner {
-        require(!isImmutable, Immutable());
+    function _spendFreePass(uint32 _nation, uint32 _quantity) internal {
+        uint32 totalReservedLeft = reservedNFTLeft[_nation];
+        uint32 validatorFreePass = freeMintPassBalance[msg.sender];
 
-        collectionURI = _ipfs;
-        emit Revealed(_ipfs);
+        require(totalReservedLeft >= _quantity, MaxFreePassUsedOnNation());
+        require(validatorFreePass >= _quantity, NoFreePass());
+
+        validatorFreePass -= _quantity;
+        totalReservedLeft -= _quantity;
+
+        reservedNFTLeft[_nation] = totalReservedLeft;
+        freeMintPassBalance[msg.sender] = validatorFreePass;
+    }
+
+    function unlockNewNation() external onlyOwner {
+        uint32 cached = lastedUnlockedNation + 1;
+        require(cached < TOTAL_NATIONS, MaxNationReached());
+
+        reservedNFTLeft[cached] = RESERVED_IDS_PER_NATION;
+        lastedUnlockedNation = cached;
+
+        emit NewNationUnlocked(cached);
+    }
+
+    function reveals(uint32 _nation, string calldata _ipfs) external onlyOwner {
+        string memory currentIPFS = nationCollectionURIs[_nation];
+
+        if (isImmutable) {
+            require(bytes(currentIPFS).length == 0, Immutable());
+        }
+
+        nationCollectionURIs[_nation] = _ipfs;
+        emit Revealed(_nation, _ipfs);
     }
 
     function setImmutable() external onlyOwner {
@@ -110,7 +175,11 @@ contract Kamisama is IKamisama, ERC721, OAppReceiver {
     function tokenURI(uint256 id) public view override returns (string memory) {
         require(_exists(id), TokenDoesNotExist());
 
-        string memory baseURI = collectionURI;
+        string memory baseURI = nationCollectionURIs[getNation(id)];
         return bytes(baseURI).length > 0 ? string.concat(baseURI, LibString.toString(id)) : "";
+    }
+
+    function getNation(uint256 id) public pure returns (uint32) {
+        return uint32((id - 1) / MAX_SUPPLY_PER_NATION);
     }
 }
