@@ -40,13 +40,39 @@
   },
   {
     "type": "function",
-    "name": "MAX_SUPPLY",
+    "name": "MAX_SUPPLY_PER_NATION",
     "inputs": [],
     "outputs": [
       {
         "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
+        "type": "uint32",
+        "internalType": "uint32"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "RESERVED_IDS_PER_NATION",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint32",
+        "internalType": "uint32"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "TOTAL_NATIONS",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint32",
+        "internalType": "uint32"
       }
     ],
     "stateMutability": "view"
@@ -126,19 +152,6 @@
   },
   {
     "type": "function",
-    "name": "collectionURI",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "string",
-        "internalType": "string"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
     "name": "endpoint",
     "inputs": [],
     "outputs": [
@@ -146,6 +159,38 @@
         "name": "",
         "type": "address",
         "internalType": "contract ILayerZeroEndpointV2"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "freeMintPassBalance",
+    "inputs": [
+      {
+        "name": "validator",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint32",
+        "internalType": "uint32"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "freeMintPassLeft",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint32",
+        "internalType": "uint32"
       }
     ],
     "stateMutability": "view"
@@ -171,16 +216,22 @@
   },
   {
     "type": "function",
-    "name": "injectMore",
+    "name": "getNation",
     "inputs": [
       {
-        "name": "_amount",
+        "name": "id",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
         "type": "uint32",
         "internalType": "uint32"
       }
     ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
+    "stateMutability": "pure"
   },
   {
     "type": "function",
@@ -267,7 +318,26 @@
   },
   {
     "type": "function",
-    "name": "lastMintedID",
+    "name": "lastMintedIdByNation",
+    "inputs": [
+      {
+        "name": "nation",
+        "type": "uint32",
+        "internalType": "uint32"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "lastMintedId",
+        "type": "uint32",
+        "internalType": "uint32"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "lastedUnlockedNation",
     "inputs": [],
     "outputs": [
       {
@@ -331,7 +401,23 @@
   {
     "type": "function",
     "name": "mint",
-    "inputs": [],
+    "inputs": [
+      {
+        "name": "_nations",
+        "type": "uint32[]",
+        "internalType": "uint32[]"
+      },
+      {
+        "name": "_quantities",
+        "type": "uint32[]",
+        "internalType": "uint32[]"
+      },
+      {
+        "name": "_useFreeMintPass",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
     "outputs": [],
     "stateMutability": "payable"
   },
@@ -347,6 +433,25 @@
       }
     ],
     "stateMutability": "pure"
+  },
+  {
+    "type": "function",
+    "name": "nationCollectionURIs",
+    "inputs": [
+      {
+        "name": "nation",
+        "type": "uint32",
+        "internalType": "uint32"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "string",
+        "internalType": "string"
+      }
+    ],
+    "stateMutability": "view"
   },
   {
     "type": "function",
@@ -450,8 +555,32 @@
   },
   {
     "type": "function",
+    "name": "reservedNFTLeft",
+    "inputs": [
+      {
+        "name": "nation",
+        "type": "uint32",
+        "internalType": "uint32"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint32",
+        "internalType": "uint32"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "reveals",
     "inputs": [
+      {
+        "name": "_nation",
+        "type": "uint32",
+        "internalType": "uint32"
+      },
       {
         "name": "_ipfs",
         "type": "string",
@@ -683,16 +812,10 @@
   },
   {
     "type": "function",
-    "name": "unlockedIds",
+    "name": "unlockNewNation",
     "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint32",
-        "internalType": "uint32"
-      }
-    ],
-    "stateMutability": "view"
+    "outputs": [],
+    "stateMutability": "nonpayable"
   },
   {
     "type": "event",
@@ -746,6 +869,37 @@
   },
   {
     "type": "event",
+    "name": "FreeMintPassGiven",
+    "inputs": [
+      {
+        "name": "guid",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "blockNumber",
+        "type": "uint32",
+        "indexed": true,
+        "internalType": "uint32"
+      },
+      {
+        "name": "to",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "totalMintPassLeft",
+        "type": "uint32",
+        "indexed": false,
+        "internalType": "uint32"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
     "name": "ImmutableActivated",
     "inputs": [],
     "anonymous": false
@@ -761,47 +915,16 @@
         "internalType": "address"
       },
       {
-        "name": "nftId",
-        "type": "uint256",
-        "indexed": true,
-        "internalType": "uint256"
-      },
-      {
-        "name": "cost",
-        "type": "uint256",
-        "indexed": false,
-        "internalType": "uint256"
-      }
-    ],
-    "anonymous": false
-  },
-  {
-    "type": "event",
-    "name": "KamisamaValidatorMinted",
-    "inputs": [
-      {
-        "name": "nftId",
-        "type": "uint256",
-        "indexed": true,
-        "internalType": "uint256"
-      },
-      {
-        "name": "to",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
-      },
-      {
-        "name": "guid",
-        "type": "bytes32",
-        "indexed": false,
-        "internalType": "bytes32"
-      },
-      {
-        "name": "blockNumber",
+        "name": "nation",
         "type": "uint32",
         "indexed": true,
         "internalType": "uint32"
+      },
+      {
+        "name": "nftId",
+        "type": "uint256",
+        "indexed": true,
+        "internalType": "uint256"
       }
     ],
     "anonymous": false
@@ -814,6 +937,19 @@
         "name": "amount",
         "type": "uint32",
         "indexed": false,
+        "internalType": "uint32"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "NewNationUnlocked",
+    "inputs": [
+      {
+        "name": "nation",
+        "type": "uint32",
+        "indexed": true,
         "internalType": "uint32"
       }
     ],
@@ -861,6 +997,12 @@
     "type": "event",
     "name": "Revealed",
     "inputs": [
+      {
+        "name": "nation",
+        "type": "uint32",
+        "indexed": true,
+        "internalType": "uint32"
+      },
       {
         "name": "collectionURI",
         "type": "string",
@@ -940,12 +1082,52 @@
   },
   {
     "type": "error",
+    "name": "InvalidQuantity",
+    "inputs": []
+  },
+  {
+    "type": "error",
     "name": "InvalidTreasury",
     "inputs": []
   },
   {
     "type": "error",
+    "name": "MaxFreePassUsedOnNation",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "MaxNationReached",
+    "inputs": []
+  },
+  {
+    "type": "error",
     "name": "MaxSupplyReached",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "MismathArrayLength",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "NationNotFound",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "NativeDetectedWhenFreeMintPassIsUsed",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "NoFreePass",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "NoMoreFreeMintPass",
     "inputs": []
   },
   {
@@ -1041,6 +1223,11 @@
   {
     "type": "error",
     "name": "TransferToZeroAddress",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "ValidatorReservedID",
     "inputs": []
   }
 ]
