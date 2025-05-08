@@ -14,5 +14,5 @@ struct KamisamaConfig {
 string constant CONFIG_FILE = "KamisamaConfig";
 string constant KAMISAMA = "Kamisama";
 string constant KAMISAMA_HEROGLYPHS = "KamisamaTicker";
-string constant MAINNET = "mainnet";
+string constant MAINNET = "ethereum";
 string constant ARBITRUM = "arbitrum";

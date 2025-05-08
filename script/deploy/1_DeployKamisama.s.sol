@@ -17,7 +17,7 @@ contract DeployKamisama is BaseScript {
             KAMISAMA,
             0,
             type(Kamisama).creationCode,
-            abi.encode(config.cost, config.owner, config.treasury, config.lzEndpoint)
+            abi.encode(config.cost, _getDeployerAddress(), config.treasury, config.lzEndpoint)
         );
 
         address kamisamaHeroglyphs = contractsOtherNetworks[ARBITRUM][KAMISAMA_HEROGLYPHS];

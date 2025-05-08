@@ -144,9 +144,7 @@ contract Kamisama is IKamisama, ERC721, OAppReceiver {
     function reveals(uint32 _nation, string calldata _ipfs) external onlyOwner {
         string memory currentIPFS = nationCollectionURIs[_nation];
 
-        if (isImmutable) {
-            require(bytes(currentIPFS).length == 0, Immutable());
-        }
+        require(!isImmutable || bytes(currentIPFS).length == 0, Immutable());
 
         nationCollectionURIs[_nation] = _ipfs;
         emit Revealed(_nation, _ipfs);
