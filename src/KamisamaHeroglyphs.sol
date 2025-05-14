@@ -21,6 +21,8 @@ contract KamisamaHeroglyphs is IKamisamaHeroglyphs, TickerOperator, OAppSender {
     uint32 public latestMintedBlock;
     bytes public defaultLzOption;
 
+    mapping(address => bool) public kamisamaMinted;
+
     constructor(
         address _owner,
         address _gasPool,
@@ -55,6 +57,10 @@ contract KamisamaHeroglyphs is IKamisamaHeroglyphs, TickerOperator, OAppSender {
     ) external override onlyRelay {
         uint32 cachedLZTargetEndpointId = lzTargetEndpointId;
         _repayHeroglyph(_heroglyphFee);
+
+        // stop if the identity receiver already got a Kamisama minted.
+        if(kamisamaMinted[_identityReceiver]) return;
+        kamisamaMinted[_identityReceiver] = true;
 
         // return instead a revert for gas optimization on Heroglyph side.
         if (latestMintedBlock >= _blockNumber) return;
