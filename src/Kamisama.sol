@@ -17,10 +17,10 @@ import { OAppCore, Origin } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/O
  * @custom:export abi
  */
 contract Kamisama is IKamisama, ERC721, OAppReceiver {
-    uint256 public immutable COST;
     uint32 public constant MAX_SUPPLY_PER_NATION = 1000;
     uint32 public constant TOTAL_NATIONS = 7;
     uint32 public constant RESERVED_IDS_PER_NATION = 15;
+    uint256 public COST;
 
     address public treasury;
     uint32 public lastedUnlockedNation;
@@ -160,6 +160,11 @@ contract Kamisama is IKamisama, ERC721, OAppReceiver {
 
         treasury = _treasury;
         emit TreasurySet(_treasury);
+    }
+
+    function setCost(uint256 _cost) external onlyOwner {
+        COST = _cost;
+        emit CostSet(_cost);
     }
 
     function name() public pure override returns (string memory) {

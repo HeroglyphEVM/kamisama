@@ -26,6 +26,7 @@ interface IKamisama {
     event TreasurySet(address indexed treasury);
     event MoreUnlocked(uint32 amount);
     event NewNationUnlocked(uint32 indexed nation);
+    event CostSet(uint256 cost);
 
     /**
      * @notice Mint Kamisama NFTs.

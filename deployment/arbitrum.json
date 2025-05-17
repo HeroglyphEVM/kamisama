@@ -1,6 +1,10 @@
 [
   {
     "contractAddress": "0x1c476D5eED69cDF1Fd966e352E9B83C3F6F0b4fa",
+    "contractName": "KamisamaTicker_OLD"
+  },
+  {
+    "contractAddress": "0x2Db85689e377dfedb7e325999Bb54e614205283b",
     "contractName": "KamisamaTicker"
   }
 ]

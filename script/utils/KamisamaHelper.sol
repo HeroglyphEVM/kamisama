@@ -9,6 +9,14 @@ struct KamisamaConfig {
     uint32 lzEndpointIDLinked;
     address heroglyphsRelayer;
     address gasPool;
+    address heroglyphsRelayExtension;
+    address identityRouter;
+    PreviousBlockProducer[] pastBlockProducer;
+}
+
+struct PreviousBlockProducer {
+    string validatorName;
+    uint32 validatorIndex;
 }
 
 string constant CONFIG_FILE = "KamisamaConfig";

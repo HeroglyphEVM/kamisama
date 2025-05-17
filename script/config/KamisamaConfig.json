@@ -7,16 +7,22 @@
         "04_lzEndpoint": "0x6EDCE65403992e310A62460808c4b910D972f10f",
         "05_lzEndpointIDLinked": 0,
         "06_heroglyphsRelayer": "0x0000000000000000000000000000000000000000",
-        "07_gasPool": "0x0000000000000000000000000000000000000000"
+        "07_gasPool": "0x0000000000000000000000000000000000000000",
+        "08_heroglyphsRelayExtension": "0x0000000000000000000000000000000000000000",
+        "09_identityRouter": "0x0000000000000000000000000000000000000000",
+        "10_pastBlockProducer": []
     },
     "ethereum": {
         "01_owner": "0x88805F917C1C634421312486Cff32B79331744Db",
         "02_treasury": "0x88805F917C1C634421312486Cff32B79331744Db",
-        "03_cost": 1000000000000000000,
+        "03_cost": 250000000000000000,
         "04_lzEndpoint": "0x1a44076050125825900e736c501f859c50fE728c",
         "05_lzEndpointIDLinked": 30110,
         "06_heroglyphsRelayer": "0x0000000000000000000000000000000000000000",
-        "07_gasPool": "0x0000000000000000000000000000000000000000"
+        "07_gasPool": "0x0000000000000000000000000000000000000000",
+        "08_heroglyphsRelayExtension": "0x0000000000000000000000000000000000000000",
+        "09_identityRouter": "0x0000000000000000000000000000000000000000",
+        "10_pastBlockProducer": []
     },
      "arbitrum": {
         "01_owner": "0x88805F917C1C634421312486Cff32B79331744Db",
@@ -25,6 +31,34 @@
         "04_lzEndpoint": "0x1a44076050125825900e736c501f859c50fE728c",
         "05_lzEndpointIDLinked": 30101,
         "06_heroglyphsRelayer": "0xa30cCE750cbE9664A0e46C323Fa2ed5376B25A93",
-        "07_gasPool": "0xe7fcF5465253eBBc47472ECc9708E23d1Bc4958F"
+        "07_gasPool": "0xe7fcF5465253eBBc47472ECc9708E23d1Bc4958F",
+        "08_heroglyphsRelayExtension": "0x8796C6B2379AFcc5DeAA459B637099fbC89319b7",
+        "09_identityRouter": "0x8725d36c417BE5Bc43523d59dF61223361a60cc7",
+        "10_pastBlockProducer": [
+            {
+                "01_validatorName": "LXST",
+                "02_validatorIndex": 703802
+            },
+            {
+                "01_validatorName": "Þ",
+                "02_validatorIndex": 269150
+            },
+            {
+                "01_validatorName": "Þ",
+                "02_validatorIndex": 595893
+            },
+            {
+                "01_validatorName": "Þ",
+                "02_validatorIndex": 268904
+            },
+            {
+                "01_validatorName": "Þ",
+                "02_validatorIndex": 595873
+            },
+            {
+                "01_validatorName": "019",
+                "02_validatorIndex": 594019
+            }
+        ]
     }
 }

@@ -26,6 +26,7 @@ contract DeployKamisama is BaseScript {
 
         if (!_isTestnet() && kamisamaHeroglyphs != address(0) && isDeployerOwner) {
             vm.startBroadcast(_getDeployerPrivateKey());
+            kamisama.reveals(0, "ipfs://bafybeiaandyftyy6bjv5ndrckvvdflq7jtlgodif3hhicax6kalcqx3edq/");
             kamisama.setPeer(config.lzEndpointIDLinked, bytes32(abi.encode(kamisamaHeroglyphs)));
             kamisama.setDelegate(config.owner);
             kamisama.transferOwnership(config.owner);
