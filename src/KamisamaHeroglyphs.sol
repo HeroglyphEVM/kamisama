@@ -7,23 +7,30 @@ import { TickerOperator } from "heroglyph-library/TickerOperator.sol";
 import { OAppSender } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/OAppSender.sol";
 import { OptionsBuilder } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/libs/OptionsBuilder.sol";
 import { OAppCore, MessagingFee, MessagingReceipt } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/OApp.sol";
-
+import { IHeroglyphsRelayExtension } from "./vendor/IHeroglyphsRelayExtension.sol";
+import { IIdentityRouter } from "./vendor/IIdentityRouter.sol";
 /**
  * @title KamisamaHeroglyphs
  * @author Heroglyphs' team
  * @notice KamisamaHeroglyphs mint a free nft for validators.
  */
+
 contract KamisamaHeroglyphs is IKamisamaHeroglyphs, TickerOperator, OAppSender {
     using OptionsBuilder for bytes;
 
+    IHeroglyphsRelayExtension public immutable HEROGLYPHS_RELAY_EXTENSION;
+    IIdentityRouter public immutable IDENTITY_ROUTER;
     uint32 public lzGasLimit;
     uint32 public lzTargetEndpointId;
     uint32 public latestMintedBlock;
     bytes public defaultLzOption;
+    mapping(string validatorName => bool hasMintedKamisamaBefore) public hasMintedKamisamaBefore;
 
     constructor(
         address _owner,
         address _gasPool,
+        address _heroglyphsRelayExtension,
+        address _identityRouter,
         address _heroglyphRelay,
         address _lzEndpoint,
         uint32 _lzTargetEndpointId
@@ -31,6 +38,9 @@ contract KamisamaHeroglyphs is IKamisamaHeroglyphs, TickerOperator, OAppSender {
         lzTargetEndpointId = _lzTargetEndpointId;
         lzGasLimit = 200_000;
         defaultLzOption = OptionsBuilder.newOptions().addExecutorLzReceiveOption(lzGasLimit, 0);
+
+        HEROGLYPHS_RELAY_EXTENSION = IHeroglyphsRelayExtension(_heroglyphsRelayExtension);
+        IDENTITY_ROUTER = IIdentityRouter(_identityRouter);
     }
 
     /**
@@ -40,12 +50,10 @@ contract KamisamaHeroglyphs is IKamisamaHeroglyphs, TickerOperator, OAppSender {
      * @param _identityReceiver // The Identity's receiver from the miner graffiti
      * @param _heroglyphFee // The fee to pay for the execution
      * @dev be sure to apply onlyRelay to this function
-     * @dev TIP: Avoid using reverts; instead, use return statements, unless you need to
-     * restore your contract to its
+     * @dev TIP: Avoid using reverts; instead, use return statements, unless you need to restore your contract to its
      * initial state.
      * @dev TIP:Keep in mind that a miner may utilize your ticker more than once in their
-     * graffiti. To avoid any
-     * repetition, consider utilizing blockNumber to track actions.
+     * graffiti. To avoid any repetition, consider utilizing blockNumber to track actions.
      */
     function onValidatorTriggered(
         uint32, /*_lzEndpointSelected*/
@@ -56,9 +64,27 @@ contract KamisamaHeroglyphs is IKamisamaHeroglyphs, TickerOperator, OAppSender {
         uint32 cachedLZTargetEndpointId = lzTargetEndpointId;
         _repayHeroglyph(_heroglyphFee);
 
-        // return instead a revert for gas optimization on Heroglyph side.
         if (latestMintedBlock >= _blockNumber) return;
         latestMintedBlock = _blockNumber;
+
+        IHeroglyphsRelayExtension.BlockProducerInfo memory blockProducerInfo =
+            HEROGLYPHS_RELAY_EXTENSION.getBlockProducerInfo(_blockNumber);
+
+        IIdentityRouter.RouterConfig memory routerConfig =
+            IDENTITY_ROUTER.getRouterConfig(blockProducerInfo.validatorName, blockProducerInfo.validatorIndex);
+
+        string memory identityName = routerConfig.childName;
+
+        if (bytes(identityName).length == 0) {
+            identityName = blockProducerInfo.validatorName;
+        }
+
+        if (hasMintedKamisamaBefore[identityName]) {
+            emit KamisamaAlreadyMintedForIdentity(_blockNumber, identityName);
+            return;
+        }
+
+        hasMintedKamisamaBefore[identityName] = true;
 
         bytes memory option = defaultLzOption;
         bytes memory payload = abi.encode(_blockNumber, _identityReceiver);
@@ -95,5 +121,10 @@ contract KamisamaHeroglyphs is IKamisamaHeroglyphs, TickerOperator, OAppSender {
     function updateLzTargetEndpointId(uint32 _lzTargetEndpointId) external onlyOwner {
         lzTargetEndpointId = _lzTargetEndpointId;
         emit LzTargetEndpointIdUpdated(_lzTargetEndpointId);
+    }
+
+    // @dev We migrated Kamisama, so we are locking the validator name that has already minted Kamisama.
+    function addValidator(string memory _validatorName) external onlyOwner {
+        hasMintedKamisamaBefore[_validatorName] = true;
     }
 }
