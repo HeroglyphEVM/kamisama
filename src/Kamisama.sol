@@ -17,18 +17,6 @@ import { OAppCore, Origin } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/O
  * @custom:export abi
  */
 contract Kamisama is IKamisama, ERC721, OAppReceiver {
-    address[] private BOUGHT_MIGRATION_LIST =
-        [0x285b7EEa81a5B66B62e7276a24c1e0F83F7409c1, 0x6212Ee7822265cE44B56C943bFd4bCcc03AeC42A];
-
-    address[] private FREE_PASS_USED_MIGRATION_LIST = [
-        0x80e8D031a3Bbd4EB04Cd19fd02cF4038344a42C5,
-        0x6212Ee7822265cE44B56C943bFd4bCcc03AeC42A,
-        0x6212Ee7822265cE44B56C943bFd4bCcc03AeC42A,
-        0x6212Ee7822265cE44B56C943bFd4bCcc03AeC42A
-    ];
-
-    address public constant UNCLAIMED_FREE_PASS_ADDRESS = 0x5F561EB8B4380886BD3Bbdc87FB4c28C0353B71a;
-
     uint32 public constant MAX_SUPPLY_PER_NATION = 1000;
     uint32 public constant TOTAL_NATIONS = 7;
     uint32 public constant RESERVED_IDS_PER_NATION = 15;
@@ -55,19 +43,6 @@ contract Kamisama is IKamisama, ERC721, OAppReceiver {
         treasury = _treasury;
         freeMintPassLeft = RESERVED_IDS_PER_NATION * TOTAL_NATIONS;
         reservedNFTLeft[0] = RESERVED_IDS_PER_NATION;
-
-        for (uint256 i = 0; i < BOUGHT_MIGRATION_LIST.length; i++) {
-            _executeMint(0, BOUGHT_MIGRATION_LIST[i], 1, false);
-        }
-
-        address receiver;
-        for (uint256 i = 0; i < FREE_PASS_USED_MIGRATION_LIST.length; i++) {
-            receiver = FREE_PASS_USED_MIGRATION_LIST[i];
-            freeMintPassBalance[msg.sender]++;
-            _executeMint(0, receiver, 1, true);
-        }
-
-        freeMintPassBalance[UNCLAIMED_FREE_PASS_ADDRESS] += 1;
     }
 
     function _lzReceive(
