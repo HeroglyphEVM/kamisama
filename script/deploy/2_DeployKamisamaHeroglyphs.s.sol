@@ -56,7 +56,7 @@ contract DeployKamisamaHeroglyphs is BaseScript {
                 kamisamaHeroglyphs.addValidator(validatorName);
             }
 
-            if (kamisama != address(0)) return;
+            if (kamisama == address(0)) return;
 
             vm.startBroadcast(_getDeployerPrivateKey());
             kamisamaHeroglyphs.setPeer(config.lzEndpointIDLinked, bytes32(abi.encode(kamisama)));
